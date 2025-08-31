@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models.patient import Patient
-from app.schemas.patient_schema import PatientCreate, PatientUpdate
-from app.models.doctor import Doctor
+from app.models.Patient import Patient
+from app.schemas.PatientSchema import PatientCreate, PatientUpdate
+from app.models.Doctor import Doctor
 class PatientService:
   async def create_patient(
     self,
@@ -24,7 +24,8 @@ class PatientService:
       if not patient:
           return None
       for field, value in patient_update.model_dump(exclude_unset=True).items():
-          setattr(patient, field, value)
+          if value is not None:
+              setattr(patient, field, value)
       await db.commit()
       await db.refresh(patient)
       return patient

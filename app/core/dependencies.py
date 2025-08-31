@@ -1,21 +1,21 @@
 from typing import AsyncGenerator
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials,OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.database import db_manager
-from app.models.doctor import Doctor
-from app.services.auth import auth_service
-from app.services.doctor import doctor_service
+from app.db.Database import db_manager
+from app.models.Doctor import Doctor
+from app.services.AuthService import auth_service
+from app.services.DoctorService import doctor_service
 from app.core.exceptions import AuthenticationError
 
-security = HTTPBearer()
-
+# security = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/app/v1/auth/login")
 async def get_db_session() -> AsyncGenerator[AsyncSession,None]:
   async for session in db_manager.get_session():
     yield session
     
 async def get_current_doctor(
-    credentials: HTTPAuthorizationCredentials= Depends(security),
+    token: str = Depends(oauth2_scheme),
     db: AsyncSession=Depends(get_db_session)
   ) -> Doctor:
     credentials_exception = HTTPException(
@@ -24,7 +24,7 @@ async def get_current_doctor(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-      payload=auth_service.verify_token(credentials.credentials)
+      payload=auth_service.verify_token(token)
       if payload is None:
         raise credentials_exception
       

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, text, DateTime,  Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from app.db.Database import Base
 
 
 

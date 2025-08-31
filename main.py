@@ -2,8 +2,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.db.database import db_manager
-from app.api.auth import router as auth_router
+from app.db.Database import db_manager
+from app.api.AuthApi import router as auth_router
+from app.api.DoctorApi import router as doctor_router
 from app.core.config import settings
 from app.core.exceptions import (
     DoctorDashboardError,
@@ -14,7 +15,9 @@ from app.core.exceptions import (
     ValidationError,
     DatabaseError
 )
-from app.api import patient_api, visit_api
+from app.api import PatientApi, VisitApi
+from fastapi.openapi.utils import get_openapi
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,8 +52,9 @@ def create_application() -> FastAPI:
     
     # Include routers
     app.include_router(auth_router, prefix=settings.api_v1_str)
-    app.include_router(patient_api.router, prefix=settings.api_v1_str)
-    app.include_router(visit_api.router, prefix=settings.api_v1_str)
+    app.include_router(doctor_router, prefix=settings.api_v1_str)
+    app.include_router(PatientApi.router, prefix=settings.api_v1_str)
+    app.include_router(VisitApi.router, prefix=settings.api_v1_str)
     
     # Exception handlers
     @app.exception_handler(DuplicateError)
@@ -118,6 +122,34 @@ def create_application() -> FastAPI:
             "version": settings.app_version,
             "docs_url": "/docs" if settings.debug else "Documentation disabled in production"
         }
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        openapi_schema = get_openapi(
+            title=settings.app_name,
+            version=settings.app_version,
+            routes=app.routes,
+        )
+        openapi_schema["components"]["securitySchemes"] = {
+            "OAuth2Password": {
+                "type": "oauth2",
+                "flows": {
+                 "password": {
+                    "tokenUrl": f"{settings.api_v1_str}/auth/login",
+                    "scopes": {}
+                    }
+                }
+            }
+        }
+    # Secure all endpoints by default, or customize per route if needed
+        for path in openapi_schema["paths"].values():
+            for method in path.values():
+                method["security"] = [{"OAuth2Password": []}]
+
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
     
     return app
 

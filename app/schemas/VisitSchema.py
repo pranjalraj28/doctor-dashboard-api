@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -11,7 +11,9 @@ class VisitCreate(VisitBase):
     pass
 
 class VisitUpdate(VisitBase):
-    pass
+    observation: Optional[str] = Field(default=None)
+    medicines_prescribed: Optional[str] = Field(default=None)
+    comments: Optional[str] = Field(default=None)
 
 class VisitResponse(VisitBase):
     id: int

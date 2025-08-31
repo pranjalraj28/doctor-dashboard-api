@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.db.database import Base
+from app.db.Database import Base
 import enum
 
 class GenderEnum(str,enum.Enum):

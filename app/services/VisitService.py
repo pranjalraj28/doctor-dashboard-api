@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models.visit import Visit
-from app.models.patient import Patient
-from app.schemas.visit_schema import VisitCreate, VisitUpdate
-from app.models.doctor import Doctor
+from app.models.Visit import Visit
+from app.models.Patient import Patient
+from app.schemas.VisitSchema import VisitCreate, VisitUpdate
+from app.models.Doctor import Doctor
 
 class VisitService:
   
@@ -32,7 +32,8 @@ class VisitService:
       if not visit:
           return None
       for field, value in visit_update.model_dump(exclude_unset=True).items():
-          setattr(visit, field, value)
+          if value is not None:
+              setattr(visit, field, value)
       await db.commit()
       await db.refresh(visit)
       return visit

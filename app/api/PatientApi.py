@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.dependencies import get_db_session, get_current_doctor
-from app.schemas.patient_schema import PatientResponse, PatientCreate, PatientUpdate
-from app.models.patient import Patient
-from app.services.patient_service import patient_service
+from app.schemas.PatientSchema import PatientResponse, PatientCreate, PatientUpdate
+from app.models.Patient import Patient
+from app.services.PatientService import patient_service
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 

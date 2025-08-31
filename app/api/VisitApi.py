@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.dependencies import get_db_session, get_current_doctor
-from app.schemas.visit_schema import VisitCreate, VisitUpdate, VisitResponse
-from app.services.visit_service import visit_service
+from app.schemas.VisitSchema import VisitCreate, VisitUpdate, VisitResponse
+from app.services.VisitService import visit_service
 
 router = APIRouter(prefix="/visits", tags=["visits"])
 

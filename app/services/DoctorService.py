@@ -2,9 +2,9 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from app.models.doctor import Doctor
-from app.schemas.doctor_schema import DoctorCreate, DoctorUpdate
-from app.services.auth import auth_service
+from app.models.Doctor import Doctor
+from app.schemas.DoctorSchema import DoctorCreate, DoctorUpdate
+from app.services.AuthService import auth_service
 from app.core.exceptions import DoctorNotFoundError, DuplicateError
 
 class DoctorService:
@@ -103,15 +103,26 @@ class DoctorService:
             raise DoctorNotFoundError("Doctor not found")
         
         # Update only provided fields
-        update_data = doctor_update.dict(exclude_unset=True)
+        update_data = doctor_update.model_dump(exclude_unset=True)
         
         for field, value in update_data.items():
-            setattr(doctor, field, value)
+            if value is not None:
+                setattr(doctor, field, value)
         
         await db.commit()
         await db.refresh(doctor)
         
         return doctor
+
+  async def delete_doctor(self, db: AsyncSession, doctor_id: int) -> None:
+      """Delete a doctor."""
+      doctor = await self.get_doctor_by_id(db, doctor_id)
+
+      if not doctor:
+          raise DoctorNotFoundError("Doctor not found")
+
+      await db.delete(doctor)
+      await db.commit()
       
 doctor_service = DoctorService()
   
