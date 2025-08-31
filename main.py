@@ -14,6 +14,7 @@ from app.core.exceptions import (
     ValidationError,
     DatabaseError
 )
+from app.api import patient_api, visit_api
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,6 +49,8 @@ def create_application() -> FastAPI:
     
     # Include routers
     app.include_router(auth_router, prefix=settings.api_v1_str)
+    app.include_router(patient_api.router, prefix=settings.api_v1_str)
+    app.include_router(visit_api.router, prefix=settings.api_v1_str)
     
     # Exception handlers
     @app.exception_handler(DuplicateError)

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
   debug: bool = True
   api_v1_str: str = "/app/v1"
   database_url:str
+  sync_database_url: str
   #jwt
   bcrypt_rounds: int = 12
   jwt_secret_key: str
