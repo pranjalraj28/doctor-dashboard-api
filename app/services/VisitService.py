@@ -37,6 +37,21 @@ class VisitService:
       await db.commit()
       await db.refresh(visit)
       return visit
+  
+  async def get_visit_by_id(
+      self,
+      db:AsyncSession,
+      visit_id:int,
+      doctor_id:int
+  )->Visit | None:
+      q = await db.execute(
+          select(Visit).join(Patient).where(
+              Visit.id == visit_id,
+              Patient.doctor_id == doctor_id
+          )
+      )
+      visit = q.scalars().first()
+      return visit
 
   async def delete_visit(self,db: AsyncSession, visit_id: int, doctor: Doctor) -> bool:
       q = await db.execute(

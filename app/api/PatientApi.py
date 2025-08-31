@@ -5,6 +5,7 @@ from typing import List
 from app.core.dependencies import get_db_session, get_current_doctor
 from app.schemas.PatientSchema import PatientResponse, PatientCreate, PatientUpdate
 from app.models.Patient import Patient
+from app.models.Doctor import Doctor
 from app.services.PatientService import patient_service
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -17,6 +18,18 @@ async def create_patient(
 ):
   patient = await patient_service.create_patient(db,patient_data, current_doctor)
   return patient
+
+@router.get("/{patient_id}",response_model=PatientResponse)
+async def get_patient_by_id(
+  patient_id:int,
+  current_doctor: Doctor = Depends(get_current_doctor),
+  db: AsyncSession = Depends(get_db_session)
+):
+  patient = await patient_service.get_patient_by_id(db,patient_id,current_doctor.id)
+  if not patient:
+    raise HTTPException(status_code=404, detail="Patient not found or unauthorized")
+  return patient
+  
 
 @router.put("/{patient_id}", response_model=PatientResponse)
 async def update_patient(

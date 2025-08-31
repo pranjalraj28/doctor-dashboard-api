@@ -5,6 +5,7 @@ from typing import List
 from app.core.dependencies import get_db_session, get_current_doctor
 from app.schemas.VisitSchema import VisitCreate, VisitUpdate, VisitResponse
 from app.services.VisitService import visit_service
+from app.models.Doctor import Doctor
 
 router = APIRouter(prefix="/visits", tags=["visits"])
 
@@ -19,6 +20,18 @@ async def create_visit(
     if not visit:
         raise HTTPException(status_code=404, detail="Patient not found or unauthorized")
     return visit
+
+@router.get("/{visit_id}", response_model=VisitResponse)
+async def get_visit_by_id(
+    visit_id:int,
+    current_doctor:Doctor = Depends(get_current_doctor),
+    db:AsyncSession = Depends(get_db_session)
+):
+    visit = await visit_service.get_visit_by_id(db,visit_id,current_doctor.id)
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found or unauthorized")
+    return visit
+    
 
 @router.put("/{visit_id}", response_model=VisitResponse)
 async def update_visit(

@@ -21,6 +21,19 @@ async def get_current_doctor_profile(
     """
     return current_doctor
 
+@router.get("/{doctor_id}", response_model=DoctorResponse)
+async def get_doctor_by_id(
+    doctor_id:int,
+    current_doctor:Doctor = Depends(get_current_doctor),
+    db:AsyncSession = Depends(get_db_session)
+):
+    if doctor_id != current_doctor.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this doctor profile")
+    doctor = await doctor_service.get_doctor_by_id(db, doctor_id)
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return doctor
+
 @router.put("/me", response_model=DoctorResponse)
 async def update_doctor_profile(
     doctor_update: DoctorUpdate,

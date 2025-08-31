@@ -40,5 +40,16 @@ class PatientService:
       patient.status = "inactive"
       await db.commit()
       return True
+  async def get_patient_by_id(
+      self,
+      db:AsyncSession,
+      patient_id:int,
+      doctor_id:int
+  ) -> Patient | None:
+      q = await db.execute(
+          select (Patient).where(Patient.id == patient_id, Patient.doctor_id == doctor_id)
+      )
+      patient = q.scalars().first()
+      return patient
   
 patient_service = PatientService()
