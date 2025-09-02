@@ -35,10 +35,19 @@ class PatientUpdate(BaseModel):
     status: Optional[str] = Field(default=None)
 
 class PatientResponse(PatientBase):
-    id: int
-    doctor_id: int
+    patient_uuid: str
     created_at: datetime
     status: str
+
+    class Config:
+        orm_mode = True
+        
+class PatientAssignmentResponse(BaseModel):
+    id: int
+    doctor_id: int
+    patient_uuid: str
+    assigned_at: datetime
+    referred_by_doctor_id: Optional[int]
 
     class Config:
         orm_mode = True

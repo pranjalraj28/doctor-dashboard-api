@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, String, text, DateTime,  Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.db.Database import Base
+from app.db.Database import db_manager
 
 
 
-class Doctor(Base):
+class Doctor(db_manager.Base):
    __tablename__ = "doctors"
    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
    username = Column(String[25], unique=True, index=True, nullable=False)
@@ -19,4 +19,6 @@ class Doctor(Base):
    created_at = Column(DateTime(timezone=True), server_default=func.now())
    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-   patients = relationship("Patient", back_populates="doctor")
+   # patients = relationship("Patient", back_populates="doctor")
+   assignments = relationship("DoctorPatientAssignment", foreign_keys="[DoctorPatientAssignment.doctor_id]", back_populates="doctor", cascade="all, delete-orphan")
+   visits = relationship("Visit", back_populates="doctor", cascade="all, delete-orphan")

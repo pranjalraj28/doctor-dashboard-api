@@ -8,7 +8,8 @@ class VisitBase(BaseModel):
     comments: Optional[str]
 
 class VisitCreate(VisitBase):
-    pass
+    patient_uuid: str
+    doctor_id: int
 
 class VisitUpdate(VisitBase):
     observation: Optional[str] = Field(default=None)
@@ -17,6 +18,8 @@ class VisitUpdate(VisitBase):
 
 class VisitResponse(VisitBase):
     id: int
+    patient_uuid: str
+    doctor_id: int
     date_of_visit: datetime
 
     class Config:

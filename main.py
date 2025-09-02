@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -17,6 +18,16 @@ from app.core.exceptions import (
 )
 from app.api import PatientApi, VisitApi
 from fastapi.openapi.utils import get_openapi
+from app.models import Doctor, Patient, Visit, DoctorPatientAssignment
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # Set the default logging level
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()  # Log to console
+    ]
+)
 
 
 @asynccontextmanager

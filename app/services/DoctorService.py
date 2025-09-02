@@ -1,3 +1,5 @@
+import traceback
+import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -7,6 +9,8 @@ from app.schemas.DoctorSchema import DoctorCreate, DoctorUpdate
 from app.services.AuthService import auth_service
 from app.core.exceptions import DoctorNotFoundError, DuplicateError
 
+logger = logging.getLogger(__name__)
+
 class DoctorService:
   async def create_doctor(
     self,
@@ -14,7 +18,9 @@ class DoctorService:
     doctor_data:DoctorCreate
   )-> Doctor:
     try:
+      logger.info(f"Creating doctor with username: {doctor_data.username} and email: {doctor_data.email}")
       hashed_password=auth_service.hash_passwords(doctor_data.password)
+      logger.debug("Password hashed successfully")
       db_doctor = Doctor(
         username=doctor_data.username,
         email=doctor_data.email,
@@ -24,18 +30,25 @@ class DoctorService:
         phone_number=doctor_data.phone_number,
         specialization=doctor_data.specialization,   
       )
+      logger.debug(f"Doctor model created: {db_doctor}")
       db.add(db_doctor)
       await db.commit()
       await db.refresh(db_doctor)
+      logger.info(f"Doctor {doctor_data.username} created successfully with ID: {db_doctor.id}")
       return db_doctor
     except IntegrityError as e:
       await db.rollback()
+      logger.warning(f"IntegrityError on creating doctor: {e}")
       if "username" in str(e.orig):
           raise DuplicateError("Username already exists")
       elif "email" in str(e.orig):
           raise DuplicateError("Email already exists")
       else:
         raise DuplicateError("Doctor with this information already exists")
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"An unexpected error occurred in create_doctor: {e}\n{traceback.format_exc()}")
+        raise
   
   async def get_doctor_by_username(
         self, 

@@ -13,6 +13,7 @@ class DatabaseManager:
   def __init__(self):
     self.engine: Optional[AsyncEngine] = None
     self.session_factory: Optional[async_sessionmaker[AsyncSession]] = None
+    self.Base = declarative_base()
     
     
   def init_db(self) -> None:
@@ -48,7 +49,6 @@ class DatabaseManager:
       await self.engine.dispose()
       
 db_manager = DatabaseManager()
-Base = declarative_base()
       
     
   

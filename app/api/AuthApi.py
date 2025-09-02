@@ -1,3 +1,5 @@
+import traceback
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_db_session
@@ -14,20 +16,26 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(prefix="/auth",tags=["authentication"])
 
+logger = logging.getLogger(__name__)
+
 @router.post("/register", response_model=DoctorResponse, status_code=status.HTTP_201_CREATED)
 async def create_doctor_profile(
   doctor_data:DoctorCreate,
   db:AsyncSession=Depends(get_db_session)
 ):
   try:
+    logger.info(f"Received doctor registration request for username: {doctor_data.username}")
+    logger.debug(f"Doctor data: {doctor_data.model_dump_json(indent=2)}")
     doctor = await doctor_service.create_doctor(db,doctor_data)
     return doctor
   except DuplicateError as e:
+    logger.warning(f"DuplicateError: {e}")
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail=str(e)
     )
   except Exception as e:
+    logger.error(f"An unexpected error occurred: {e}\n{traceback.format_exc()}")
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail="An error occurred while creating the doctor profile"
